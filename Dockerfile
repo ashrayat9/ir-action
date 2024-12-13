@@ -3,9 +3,7 @@ FROM ubuntu:latest
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     curl \
-    jq \
-    base64 \
-    docker.io
+    jq 
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
