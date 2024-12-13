@@ -1,0 +1,21 @@
+name: 'VB Scan Action'
+description: 'Perform a VB SBOM scan and retrieve ECR credentials'
+inputs:
+  vb-api-url:
+    description: 'VB API URL'
+    required: true
+  vb-api-key:
+    description: 'VB API Key'
+    required: true
+outputs:
+  scan-id:
+    description: 'The ID of the created SBOM scan'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.vb-api-url }}
+    - ${{ inputs.vb-api-key }}
+branding:
+  icon: 'search'
+  color: 'blue'
