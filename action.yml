@@ -20,64 +20,64 @@ outputs:
     description: 'The registry ID retrieved from the API'
 runs:
   using: 'composite'
-steps:
-  - name: Initiating SBOM Scan
-    id: createScan
-    uses: fjogeleit/http-request-action@v1.15.1
-    with:
-      url: '${{ inputs.VB_API_URL }}/utilityapi/v1/scan'
-      method: 'POST'
-      data: '{"api_key": "${{ inputs.VB_API_KEY }}"}'
-    # Debugging the response
-  - name: Debug Scan Response
-    run: |
-      echo "Scan API Response: ${{ steps.createScan.outputs.response }}"
-    shell: bash
-
-  - name: Parse Response
-    id: parseResponse
-    run: |
-      scan_id=${{fromJSON(steps.createScan.outputs.response).data.scan_id}}
-      echo "DEBUG scan_id=$scan_id"
-      echo "scan_id=$scan_id" >> "$GITHUB_OUTPUT"
-    shell: bash
-
-  - name: Fetching VB Token
-    id: fetchECRDetails
-    uses: fjogeleit/http-request-action@v1.15.1
-    with:
-      url: '${{ inputs.VB_API_URL }}/utilityapi/v1/registry?api_key=${{ inputs.VB_API_KEY }}'
-      method: 'GET'
-
-  - name: Debug Registry Response
-    run: |
-      echo "Registry API Response: ${{ steps.fetchECRDetails.outputs.response }}"
-    shell: bash
-
-  - name: Decoding VB Token
-    id: parseToken
-    run: |
-      DECODED_TOKEN=$(echo ${{ fromJson(steps.fetchECRDetails.outputs.response).data }} | base64 -d)
-      echo "DEBUG DECODED_TOKEN=$DECODED_TOKEN"
-      echo "DECODED_TOKEN=$DECODED_TOKEN" >> "$GITHUB_OUTPUT"
-    shell: bash
-
-  - name: ECR Details
-    id: ecr_details
-    run: |
-      username=${{fromJSON(DECODED_TOKEN).username}}
-      token=${{fromJSON(DECODED_TOKEN).password}}
-      region=${{fromJSON(DECODED_TOKEN).region}}
-      registry_id=${{fromJSON(DECODED_TOKEN).registry_id}}
-      echo "DEBUG username=$username"
-      echo "DEBUG token=$token"
-      echo "DEBUG region=$region"
-      echo "DEBUG registry_id=$registry_id"
-      echo "username=$username" >> "$GITHUB_OUTPUT"
-      echo "token=$token" >> "$GITHUB_OUTPUT"
-      echo "region=$region" >> "$GITHUB_OUTPUT"
-      echo "registry_id=$registry_id" >> "$GITHUB_OUTPUT"
-    shell: bash
+  steps:
+    - name: Initiating SBOM Scan
+      id: createScan
+      uses: fjogeleit/http-request-action@v1.15.1
+      with:
+        url: '${{ inputs.VB_API_URL }}/utilityapi/v1/scan'
+        method: 'POST'
+        data: '{"api_key": "${{ inputs.VB_API_KEY }}"}'
+      # Debugging the response
+    - name: Debug Scan Response
+      run: |
+        echo "Scan API Response: ${{ steps.createScan.outputs.response }}"
+      shell: bash
+  
+    - name: Parse Response
+      id: parseResponse
+      run: |
+        scan_id=${{fromJSON(steps.createScan.outputs.response).data.scan_id}}
+        echo "DEBUG scan_id=$scan_id"
+        echo "scan_id=$scan_id" >> "$GITHUB_OUTPUT"
+      shell: bash
+  
+    - name: Fetching VB Token
+      id: fetchECRDetails
+      uses: fjogeleit/http-request-action@v1.15.1
+      with:
+        url: '${{ inputs.VB_API_URL }}/utilityapi/v1/registry?api_key=${{ inputs.VB_API_KEY }}'
+        method: 'GET'
+  
+    - name: Debug Registry Response
+      run: |
+        echo "Registry API Response: ${{ steps.fetchECRDetails.outputs.response }}"
+      shell: bash
+  
+    - name: Decoding VB Token
+      id: parseToken
+      run: |
+        DECODED_TOKEN=$(echo ${{ fromJson(steps.fetchECRDetails.outputs.response).data }} | base64 -d)
+        echo "DEBUG DECODED_TOKEN=$DECODED_TOKEN"
+        echo "DECODED_TOKEN=$DECODED_TOKEN" >> "$GITHUB_OUTPUT"
+      shell: bash
+  
+    - name: ECR Details
+      id: ecr_details
+      run: |
+        username=${{fromJSON(DECODED_TOKEN).username}}
+        token=${{fromJSON(DECODED_TOKEN).password}}
+        region=${{fromJSON(DECODED_TOKEN).region}}
+        registry_id=${{fromJSON(DECODED_TOKEN).registry_id}}
+        echo "DEBUG username=$username"
+        echo "DEBUG token=$token"
+        echo "DEBUG region=$region"
+        echo "DEBUG registry_id=$registry_id"
+        echo "username=$username" >> "$GITHUB_OUTPUT"
+        echo "token=$token" >> "$GITHUB_OUTPUT"
+        echo "region=$region" >> "$GITHUB_OUTPUT"
+        echo "registry_id=$registry_id" >> "$GITHUB_OUTPUT"
+      shell: bash
 branding:
   icon: 'search'
   color: 'blue'
