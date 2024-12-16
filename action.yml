@@ -11,11 +11,12 @@ outputs:
   scan-id:
     description: 'The ID of the created SBOM scan'
 runs:
-  using: 'node12'
-  main: 'entrypoint.sh'
-  args:
-    - ${{ inputs.vb-api-url }}
-    - ${{ inputs.vb-api-key }}
+  using: 'composite'  # Use 'composite' for running a shell script
+  steps:
+    - name: Run entrypoint
+      shell: bash
+      run: |
+        ./entrypoint.sh ${{ inputs.vb-api-url }} ${{ inputs.vb-api-key }}
 branding:
   icon: 'search'
   color: 'blue'
