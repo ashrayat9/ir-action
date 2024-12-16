@@ -8,12 +8,16 @@ inputs:
     description: 'VB API Key'
     required: true
 outputs:
-  scan-id: ${{ steps.parseResponse.outputs.scan_id }}
-  ecr_username: ${{steps.ecr_details.outputs.username}}
-  ecr_token: ${{steps.ecr_details.outputs.token}}
-  ecr_region: ${{steps.ecr_details.outputs.region}}
-  ecr_id: ${{steps.ecr_details.outputs.registry_id}}
-
+  scan_id: 
+    description: 'The ID of the created SBOM scan'
+  username:
+    description: 'The username retrieved from the API'
+  token:
+    description: 'The token retrieved from the API'
+  region:
+    description: 'The region retrieved from the API'
+  registry_id:
+    description: 'The registry ID retrieved from the API'
 runs:
   using: 'composite'
   steps:
@@ -29,7 +33,7 @@ runs:
       id: parseResponse
       run: |
            echo "scan_id=${{fromJSON(steps.createScan.outputs.response).data.scan_id}}" >> "$GITHUB_OUTPUT"
-           echo "$scan_id"
+           echo $scan_id
       shell: bash
     
     - name: Fetching VB Token
