@@ -21,56 +21,36 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: Run VB Scan
-      shell: bash
+    - name: Initiating SBOM Scan
+      id: createScan
+      uses: fjogeleit/http-request-action@v1.15.1
+      with:
+        url: '${{ inputs.VB_API_URL }}/utilityapi/v1/scan'
+        method: 'POST'
+        data: '{"api_key": "${{ inputs.VB_API_KEY }}"}'
+
+    - name: Parse Response
+      id: parseResponse
+      run: echo "scan_id=${{fromJSON(steps.createScan.outputs.response).data.scan_id}}" >> "$GITHUB_OUTPUT"
+
+    - name: Fetching VB Token
+      id: fetchECRDetails
+      uses: fjogeleit/http-request-action@v1.15.1
+      with:
+          url: '${{ inputs.VB_API_URL }}/utilityapi/v1/registry?api_key=${{ inputs.VB_API_KEY }}'
+          method: 'GET'
+
+    - name: Decoding VB Token
+      id: parseToken
+      run: echo "DECODED_TOKEN=$(echo ${{ fromJson(steps.fetchECRDetails.outputs.response).data }} | base64 -d)" >> "$GITHUB_OUTPUT"
+
+    - name: ECR Details
+      id: ecr_details
       run: |
-        set -e
-        VB_API_URL="${{ inputs.VB_API_URL }}"
-        VB_API_KEY="${{ inputs.VB_API_KEY }}"
-
-        export_vb_environment_variables() {
-            echo "Exporting VB Environment Variables..."
-            if [ -z "$VB_API_URL" ] || [ -z "$VB_API_KEY" ]; then
-                echo "Error: Missing required variables: VB_API_URL or VB_API_KEY" >&2
-                return 1
-            fi
-            local api_url="${VB_API_URL}utilityapi/v1/registry?api_key=${VB_API_KEY}"
-            local response
-            response=$(curl --silent --location "$api_url")
-            local encoded_data
-            encoded_data=$(echo "$response" | jq -r '.data')
-            if [ -z "$encoded_data" ]; then
-                echo "Error: No data received from registry API" >&2
-                return 1
-            fi
-            local decoded_data
-            decoded_data=$(echo "$encoded_data" | base64 -d)
-
-            # Write to GITHUB_OUTPUT
-            echo "username=$(echo \"$decoded_data\" | jq -r '.username')" >> "$GITHUB_OUTPUT"
-            echo "password=$(echo \"$decoded_data\" | jq -r '.password')" >> "$GITHUB_OUTPUT"
-            echo "region=$(echo \"$decoded_data\" | jq -r '.region')" >> "$GITHUB_OUTPUT"
-            echo "registry_id=$(echo \"$decoded_data\" | jq -r '.registry_id')" >> "$GITHUB_OUTPUT"
-        }
-
-        create_sbom_scan() {
-            echo "Creating SBOM Scan..."
-            local request_body="{\"api_key\": \"${VB_API_KEY}\"}"
-            local response
-            response=$(curl --silent --location "${VB_API_URL}utilityapi/v1/scan" \
-                -H "Content-Type: application/json" \
-                -d "$request_body")
-            local scan_id
-            scan_id=$(echo "$response" | jq -r '.data.scan_id')
-            if [ -z "$scan_id" ] || [ "$scan_id" = "null" ]; then
-                echo "Error: Failed to get scan_id from API response" >&2
-                return 1
-            fi
-            echo "scan_id=$scan_id" >> "$GITHUB_OUTPUT"
-        }
-
-        export_vb_environment_variables
-        create_sbom_scan
+        echo "username=${{fromJSON(steps.parseToken.outputs.DECODED_TOKEN).username}}" >> "$GITHUB_OUTPUT"
+        echo "token=${{fromJSON(steps.parseToken.outputs.DECODED_TOKEN).password}}" >> "$GITHUB_OUTPUT"
+        echo "region=${{fromJSON(steps.parseToken.outputs.DECODED_TOKEN).region}}" >> "$GITHUB_OUTPUT"
+        echo "registry_id=${{fromJSON(steps.parseToken.outputs.DECODED_TOKEN).registry_id}}" >> "$GITHUB_OUTPUT"
 branding:
   icon: 'search'
   color: 'blue'
