@@ -1,10 +1,10 @@
 name: 'VB Scan Action'
 description: 'Perform a VB SBOM scan and retrieve ECR credentials'
 inputs:
-  vb-api-url:
+  VB_API_URL:
     description: 'VB API URL'
     required: true
-  vb-api-key:
+  VB_API_KEY:
     description: 'VB API Key'
     required: true
 outputs:
@@ -25,8 +25,8 @@ runs:
       shell: bash
       run: |
         set -e
-        VB_API_URL="${{ inputs.vb-api-url }}"
-        VB_API_KEY="${{ inputs.vb-api-key }}"
+        VB_API_URL="${{ inputs.VB_API_URL }}"
+        VB_API_KEY="${{ inputs.VB_API_KEY }}"
 
         export_vb_environment_variables() {
             echo "Exporting VB Environment Variables..."
