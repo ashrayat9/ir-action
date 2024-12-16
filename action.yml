@@ -8,16 +8,32 @@ inputs:
     description: 'VB API Key'
     required: true
 outputs:
-  scan_id: 
-    description: 'The ID of the created SBOM scan'
+  scan_id:
+    description: 'The ID of the scan'
+    value: ${{ steps.parseResponse.outputs.scan_id }}
   username:
-    description: 'The username retrieved from the API'
-  token:
-    description: 'The token retrieved from the API'
+    description: 'ECR username'
+    value: ${{ steps.ecr_details.outputs.username }}
+  password:
+    description: 'ECR password'
+    value: ${{ steps.ecr_details.outputs.token }}
   region:
-    description: 'The region retrieved from the API'
+    description: 'ECR region'
+    value: ${{ steps.ecr_details.outputs.region }}
   registry_id:
-    description: 'The registry ID retrieved from the API'
+    description: 'ECR registry ID'
+    value: ${{ steps.ecr_details.outputs.registry_id }}
+# outputs:
+#   scan_id: 
+#     description: 'The ID of the created SBOM scan'
+#   username:
+#     description: 'The username retrieved from the API'
+#   token:
+#     description: 'The token retrieved from the API'
+#   region:
+#     description: 'The region retrieved from the API'
+#   registry_id:
+#     description: 'The registry ID retrieved from the API'
 runs:
   using: 'composite'
   steps:
