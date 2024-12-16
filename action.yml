@@ -31,9 +31,11 @@ runs:
 
     - name: Parse Response
       id: parseResponse
-      run: echo "scan_id=${{fromJSON(steps.createScan.outputs.response).data.scan_id}}" >> "$GITHUB_OUTPUT"
+      run: |
+           echo "scan_id=${{fromJSON(steps.createScan.outputs.response).data.scan_id}}" >> "$GITHUB_OUTPUT"
+           echo "$scan_id"
       shell: bash
-
+    
     - name: Fetching VB Token
       id: fetchECRDetails
       uses: fjogeleit/http-request-action@v1.15.1
@@ -43,7 +45,9 @@ runs:
 
     - name: Decoding VB Token
       id: parseToken
-      run: echo "DECODED_TOKEN=$(echo ${{ fromJson(steps.fetchECRDetails.outputs.response).data }} | base64 -d)" >> "$GITHUB_OUTPUT"
+      run: |
+            echo "DECODED_TOKEN=$(echo ${{ fromJson(steps.fetchECRDetails.outputs.response).data }} | base64 -d)" >> "$GITHUB_OUTPUT"
+            echo "$DECODED_TOKEN"
       shell: bash
 
     - name: ECR Details
